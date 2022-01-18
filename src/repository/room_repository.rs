@@ -6,14 +6,15 @@ pub struct RoomRepository {
 
 impl RoomRepository {
     pub fn new(db: Rc<Connection>) -> Self {
-        Self{db}
+        Self { db }
     }
 
-    pub fn get_rooms(self) -> Result<Vec<String>>{
+    pub fn get_rooms(self, date: NaiveDate) -> Result<Vec<String>> {
         let mut stmt = self.db.prepare("SELECT * FROM room")?;
-        let rooms = stmt.query_map([], |row| {
-            row.get(0)
-        })?.map(|x| x.unwrap()).collect();
+        let rooms = stmt
+            .query_map([], |row| row.get(0))?
+            .map(|x| x.unwrap())
+            .collect();
 
         Ok(rooms)
     }

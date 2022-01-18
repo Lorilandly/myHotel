@@ -2,15 +2,15 @@ mod app;
 mod entity;
 mod repository;
 
-pub use self::{entity::reservation::*};
+pub use self::entity::reservation::*;
 pub use self::repository::{reservation_repository::*, room_repository::*};
-use rusqlite::{params, Connection, Result};
 use chrono::naive::*;
+use rusqlite::{params, Connection, Result};
 use std::error;
 use std::rc::Rc;
 use uuid::Uuid;
 
-fn start() -> Result<()>{
+fn start() -> Result<()> {
     let sql = Rc::new(Connection::open("hotel.db")?);
     Ok(())
 }

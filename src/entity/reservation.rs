@@ -16,7 +16,7 @@ impl Reservation {
             date,
             room,
             checkin: false,
-            checkout: false
+            checkout: false,
         }
     }
 }

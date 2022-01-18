@@ -1,7 +1,6 @@
 use crate::*;
-use std::str::FromStr;
 
-pub struct ReservationController{
+pub struct ReservationController {
     reservation_repository: ReservationRepository,
     room_repository: RoomRepository,
 }
@@ -11,11 +10,24 @@ impl ReservationController {
         let checkin_date: NaiveDate = checkin_date.parse()?;
 
         // get available room, return error if no available
-        RoomRepository.getRooms(checkin_date)?;
+        let rooms = self.room_repository.get_rooms(checkin_date)?;
 
         // make reservations
-        let reservation = Reservation::new(checkin_date, 1001);
-        self.reservation_repository.insert_reservation(&reservation);
+        let reservation =
+            Reservation::new(checkin_date, rooms.first().ok_or(NoRoomError)?.parse()?);
+        self.reservation_repository
+            .insert_reservation(&reservation)?;
         Ok(reservation.reservation_id)
+    }
+}
+
+#[derive(Debug)]
+struct NoRoomError;
+
+impl error::Error for NoRoomError {}
+
+impl std::fmt::Display for NoRoomError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "No Empty room available for the chosen date")
     }
 }
