@@ -1,16 +1,21 @@
 use crate::*;
 
+#[derive(Clone, Debug)]
 pub struct ReservationController {
     reservation_repository: ReservationRepository,
     room_repository: RoomRepository,
 }
 
 impl ReservationController {
-    fn reserve(self, checkin_date: &str) -> Result<Uuid, Box<dyn error::Error>> {
+    pub fn new(reservation_repository: ReservationRepository, room_repository: RoomRepository) -> Self {
+        Self{reservation_repository, room_repository}
+    }
+    pub fn reserve(self, checkin_date: &str) -> Result<Uuid, Box<dyn error::Error>> {
+        // date needs to be in yyyy-mm-dd
         let checkin_date: NaiveDate = checkin_date.parse()?;
 
         // get available room, return error if no available
-        let rooms = self.room_repository.get_rooms(checkin_date)?;
+        let rooms = self.room_repository.get_empty_rooms(checkin_date)?;
 
         // make reservations
         let reservation =

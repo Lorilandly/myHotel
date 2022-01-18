@@ -1,5 +1,6 @@
 use crate::*;
 
+#[derive(Clone, Debug)]
 pub struct RoomRepository {
     db: Rc<Connection>,
 }
@@ -9,8 +10,8 @@ impl RoomRepository {
         Self { db }
     }
 
-    pub fn get_rooms(self, date: NaiveDate) -> Result<Vec<String>> {
-        let mut stmt = self.db.prepare("SELECT * FROM room")?;
+    pub fn get_empty_rooms(&self, date: NaiveDate) -> Result<Vec<String>> {
+        let mut stmt = self.db.prepare(&format!("SELECT room FROM reservation where date={}",date))?;
         let rooms = stmt
             .query_map([], |row| row.get(0))?
             .map(|x| x.unwrap())

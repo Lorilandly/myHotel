@@ -2,6 +2,7 @@ mod app;
 mod entity;
 mod repository;
 
+pub use self::app::{reservation_controller::*, checkin_controller::*};
 pub use self::entity::reservation::*;
 pub use self::repository::{reservation_repository::*, room_repository::*};
 use chrono::naive::*;
@@ -10,9 +11,20 @@ use std::error;
 use std::rc::Rc;
 use uuid::Uuid;
 
-fn start() -> Result<()> {
-    let sql = Rc::new(Connection::open("hotel.db")?);
-    Ok(())
+pub struct Hotel {
+    reservation_controller: ReservationController,
+    checkin_controller: CheckinController,
+}
+
+impl Hotel {
+    fn new() -> Result<Self> {
+        let db = Rc::new(Connection::open("hotel.db")?);
+        let reservation_repo = ReservationRepository::new(db.clone());
+        let room_repo = RoomRepository::new(db.clone());
+        let reservation_controller = ReservationController::new(reservation_repo.clone(), room_repo.clone());
+        let checkin_controller = CheckinController::new(reservation_repo.clone());
+        Ok(Self{reservation_controller, checkin_controller})
+    }
 }
 /*
 #[macro_use]
