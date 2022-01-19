@@ -7,8 +7,14 @@ pub struct ReservationController {
 }
 
 impl ReservationController {
-    pub fn new(reservation_repository: ReservationRepository, room_repository: RoomRepository) -> Self {
-        Self{reservation_repository, room_repository}
+    pub fn new(
+        reservation_repository: ReservationRepository,
+        room_repository: RoomRepository,
+    ) -> Self {
+        Self {
+            reservation_repository,
+            room_repository,
+        }
     }
     pub fn reserve(&self, checkin_date: &str) -> Result<Uuid, Box<dyn error::Error>> {
         // date needs to be in yyyy-mm-dd
@@ -16,6 +22,7 @@ impl ReservationController {
 
         // get available room, return error if no available
         let rooms = self.room_repository.get_empty_rooms(checkin_date)?;
+        // let rooms = vec!("1002");
 
         // make reservations
         let reservation =
