@@ -10,7 +10,7 @@ impl ReservationController {
     pub fn new(reservation_repository: ReservationRepository, room_repository: RoomRepository) -> Self {
         Self{reservation_repository, room_repository}
     }
-    pub fn reserve(self, checkin_date: &str) -> Result<Uuid, Box<dyn error::Error>> {
+    pub fn reserve(&self, checkin_date: &str) -> Result<Uuid, Box<dyn error::Error>> {
         // date needs to be in yyyy-mm-dd
         let checkin_date: NaiveDate = checkin_date.parse()?;
 

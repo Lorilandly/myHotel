@@ -9,7 +9,7 @@ impl CheckinController {
         Self{reservation_repository}
     }
 
-    pub fn checkin(self, reservation_id: Uuid) -> Result<String> {
+    pub fn checkin(&self, reservation_id: Uuid) -> Result<String> {
         // get reservation from id
         let reservation = self.reservation_repository.get_reservation(reservation_id)?;
 

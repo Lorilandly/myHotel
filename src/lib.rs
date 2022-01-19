@@ -2,7 +2,7 @@ mod app;
 mod entity;
 mod repository;
 
-pub use self::app::{reservation_controller::*, checkin_controller::*};
+pub use self::app::{reservation_controller::*, checkin_controller::*, checkout_controller::*};
 pub use self::entity::reservation::*;
 pub use self::repository::{reservation_repository::*, room_repository::*};
 use chrono::naive::*;
@@ -14,31 +14,39 @@ use uuid::Uuid;
 pub struct Hotel {
     reservation_controller: ReservationController,
     checkin_controller: CheckinController,
+    checkout_controller: CheckoutController,
 }
 
 impl Hotel {
-    fn new() -> Result<Self> {
+    pub fn new() -> Result<Self> {
         let db = Rc::new(Connection::open("hotel.db")?);
         let reservation_repo = ReservationRepository::new(db.clone());
         let room_repo = RoomRepository::new(db.clone());
         let reservation_controller = ReservationController::new(reservation_repo.clone(), room_repo.clone());
         let checkin_controller = CheckinController::new(reservation_repo.clone());
-        Ok(Self{reservation_controller, checkin_controller})
+        let checkout_controller = CheckoutController::new(reservation_repo.clone());
+        Ok(Self{reservation_controller, checkin_controller, checkout_controller})
+    }
+    pub fn reserve(&self, date: &str) -> Option<String> {
+        match self.reservation_controller.reserve(date) {
+            Ok(i) => Some(i.to_string()),
+            Err(e) => {
+                println!("{:?}", e);
+                None
+            },
+        }
     }
 }
-/*
-#[macro_use]
-extern crate lazy_static;
-lazy_static!{
-    static ref CONN: Connection = Connection::open("hotel.db");
-}
-*/
 
-/*
-fn checkin(reservation: &str) -> Result<&str, Box<dyn error::Error>> {
-    let date = reservation.parse::<Reservation>()?.free();
+#[cfg(test)]
+mod tests {
+    use crate::*;
+    #[test]
+    fn reservation() {
+        let a = Hotel::new().unwrap();
+        let b = a.reservation_controller.reserve("1111-1-1");
+
+        println!("{:?}", b);
+        // gay
+    }
 }
-fn checkout(room: &str) -> Result<&str, Box<dyn error::Error>> {
-    todo!()
-}
-*/

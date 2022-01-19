@@ -33,4 +33,7 @@ impl ReservationRepository {
         )?;
         Ok(())
     }
+    pub fn signout(&self, reservation_id: Uuid) -> Result<()> {
+        todo!()
+    }
 }
