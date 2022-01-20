@@ -3,7 +3,11 @@ use crate::*;
 pub struct Sql;
 
 impl Sql {
-    pub fn init(db: Rc<Connection>) -> Result<()> {
+    pub(crate) fn init(db_file: &str) -> Result<Connection> {
+        if std::path::Path::new(db_file).exists() {
+            return Ok(Connection::open(db_file)?);
+        }
+        let db = Connection::open(db_file)?;
         db.execute(
             "CREATE TABLE IF NOT EXISTS reservation (
                   reservation_id   TEXT PRIMARY KEY,
@@ -15,14 +19,20 @@ impl Sql {
             params![],
         )?;
         db.execute(
-            "CREATE TABLE IF NOT EXIST room (
-                  id              INTEGER PRIMARY KEY,
-                  name            TEXT NOT NULL,
-                  time_created    TEXT NOT NULL,
-                  data            BLOB
+            "CREATE TABLE IF NOT EXISTS room (
+                  room_number       TEXT PRIMARY KEY,
+                  room_type         TEXT,
+                  room_price        INTEGER
                   )",
             params![],
         )?;
-        todo!()
+        db.execute(
+            "INSERT INTO room (room_number) VALUES
+                (1001),
+                (1002)
+            ",
+            params![],
+        )?;
+        Ok(db)
     }
 }

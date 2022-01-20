@@ -3,9 +3,9 @@ mod entity;
 mod repository;
 mod sql;
 
-pub use self::app::{checkin_controller::*, checkout_controller::*, reservation_controller::*};
+use self::app::{checkin_controller::*, checkout_controller::*, reservation_controller::*};
 pub use self::entity::reservation::*;
-pub use self::repository::{reservation_repository::*, room_repository::*};
+use self::repository::{reservation_repository::*, room_repository::*};
 use self::sql::*;
 use chrono::naive::*;
 use rusqlite::{params, Connection, Result};
@@ -21,8 +21,7 @@ pub struct Hotel {
 
 impl Hotel {
     pub fn new() -> Result<Self> {
-        let db = Rc::new(Connection::open("hotel.db")?);
-        Sql::init(db.clone());
+        let db = Rc::new(Sql::init(&"hotel.db")?);
         let reservation_repo = ReservationRepository::new(db.clone());
         let room_repo = RoomRepository::new(db.clone());
         let reservation_controller =
@@ -39,7 +38,25 @@ impl Hotel {
         match self.reservation_controller.reserve(date) {
             Ok(i) => Some(i.to_string()),
             Err(e) => {
-                println!("{:?}", e);
+                println!("{}", e);
+                None
+            }
+        }
+    }
+    pub fn checkin(&self, reservation_id: String) -> Option<String> {
+        match self.checkin_controller.checkin(reservation_id) {
+            Ok(i) => Some(i.to_string()),
+            Err(e) => {
+                println!("{}", e);
+                None
+            }
+        }
+    }
+    pub fn checkout(&self, reservation_id: String, room: String) -> Option<String> {
+        match self.checkout_controller.checkout(room, reservation_id) {
+            Ok(_) => Some(String::from("Success")),
+            Err(e) => {
+                println!("{}", e);
                 None
             }
         }
@@ -51,10 +68,10 @@ mod tests {
     use crate::*;
     #[test]
     fn reservation() {
-        let a = Hotel::new().unwrap();
-        let b = a.checkout_controller.checkout("1".to_string(), "b3127".to_string());
-        // let b = a.checkin_controller.checkin("b3127".to_string());
-        // let b = a.reservation_controller.reserve("1111-1-1");
+        let a = Hotel::new().expect("sth");
+        // let b = a.reserve("1111-1-1");
+        // let b = a.checkin("4a7".to_string());
+        // let b = a.checkout(String::from("1"), "1bd8".to_string());
 
         println!("{:?}", b);
     }

@@ -1,13 +1,13 @@
 use crate::*;
 
 #[derive(Clone, Debug)]
-pub struct ReservationController {
+pub(crate) struct ReservationController {
     reservation_repository: ReservationRepository,
     room_repository: RoomRepository,
 }
 
 impl ReservationController {
-    pub fn new(
+    pub(crate) fn new(
         reservation_repository: ReservationRepository,
         room_repository: RoomRepository,
     ) -> Self {
@@ -16,7 +16,7 @@ impl ReservationController {
             room_repository,
         }
     }
-    pub fn reserve(&self, checkin_date: &str) -> Result<Uuid, Box<dyn error::Error>> {
+    pub(crate) fn reserve(&self, checkin_date: &str) -> Result<Uuid, Box<dyn error::Error>> {
         // date needs to be in yyyy-mm-dd
         let checkin_date: NaiveDate = checkin_date.parse()?;
 

@@ -2,18 +2,18 @@ use super::*;
 use crate::*;
 
 #[derive(Clone, Debug)]
-pub struct ReservationRepository {
+pub(crate) struct ReservationRepository {
     db: Rc<Connection>,
 }
 
 impl Repository for ReservationRepository {}
 
 impl ReservationRepository {
-    pub fn new(db: Rc<Connection>) -> Self {
+    pub(crate) fn new(db: Rc<Connection>) -> Self {
         Self { db }
     }
 
-    pub fn get_reservation(&self, reservation_id: &str) -> Result<Reservation> {
+    pub(crate) fn get_reservation(&self, reservation_id: &str) -> Result<Reservation> {
         self.db.query_row(
             "SELECT reservation_id, date, room, checkin, checkout FROM reservation WHERE reservation_id LIKE ?1",
             params![format!("{}{}", reservation_id, "%")],
@@ -21,14 +21,14 @@ impl ReservationRepository {
                 Ok(Reservation {
                     reservation_id: row.get::<usize, String>(0)?.parse().unwrap(),
                     date: row.get(1)?,
-                    room: row.get::<usize, u32>(2)?,
+                    room: row.get(2)?,
                     checkin: row.get(3)?,
                     checkout: row.get(4)?,
                 })
             },
         )
     }
-    pub fn insert_reservation(&self, reservation: &Reservation) -> Result<()> {
+    pub(crate) fn insert_reservation(&self, reservation: &Reservation) -> Result<()> {
         self.db.execute(
             "INSERT INTO reservation (reservation_id, date, room) VALUES (?1, date(?2), ?3)",
             params![
@@ -39,14 +39,14 @@ impl ReservationRepository {
         )?;
         Ok(())
     }
-    pub fn signin(&self, reservation_id: Uuid) -> Result<()> {
+    pub(crate) fn signin(&self, reservation_id: Uuid) -> Result<()> {
         self.db.execute(
             "UPDATE reservation SET checkin=True WHERE reservation_id=?1",
             params![reservation_id.to_string()],
         )?;
         Ok(())
     }
-    pub fn signout(&self, reservation_id: Uuid) -> Result<()> {
+    pub(crate) fn signout(&self, reservation_id: Uuid) -> Result<()> {
         self.db.execute(
             "UPDATE reservation SET checkout=True WHERE reservation_id=?1",
             params![reservation_id.to_string()],
@@ -66,9 +66,11 @@ mod tests {
 
     #[test]
     fn vector() {
-        let rooms = vec!("1002");
-        let reservation =
-            Reservation::new("1111-1-1".parse::<NaiveDate>().unwrap(), rooms.first().unwrap().parse().unwrap());
+        let rooms = vec!["1002"];
+        let reservation = Reservation::new(
+            "1111-1-1".parse::<NaiveDate>().unwrap(),
+            rooms.first().unwrap().parse().unwrap(),
+        );
         assert_eq!(reservation.room, 1002)
     }
 }

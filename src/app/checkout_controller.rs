@@ -1,17 +1,17 @@
 use crate::*;
 
-pub struct CheckoutController {
+pub(crate) struct CheckoutController {
     reservation_repository: ReservationRepository,
 }
 
 impl CheckoutController {
-    pub fn new(reservation_repository: ReservationRepository) -> Self {
+    pub(crate) fn new(reservation_repository: ReservationRepository) -> Self {
         Self {
             reservation_repository,
         }
     }
 
-    pub fn checkout(
+    pub(crate) fn checkout(
         &self,
         room: String,
         reservation_id: String,
@@ -20,7 +20,6 @@ impl CheckoutController {
         let reservation = self
             .reservation_repository
             .get_reservation(&reservation_id)?;
-        println!("{:?}", reservation);
 
         // check if checked in
         if reservation.checkin == false {
@@ -31,7 +30,8 @@ impl CheckoutController {
         }
 
         // switch toggle state for checkout
-        self.reservation_repository.signout(reservation.reservation_id)?;
+        self.reservation_repository
+            .signout(reservation.reservation_id)?;
         Ok(())
     }
 }

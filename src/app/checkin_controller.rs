@@ -1,24 +1,25 @@
 use crate::*;
 
-pub struct CheckinController {
+pub(crate) struct CheckinController {
     reservation_repository: ReservationRepository,
 }
 
 impl CheckinController {
-    pub fn new(reservation_repository: ReservationRepository) -> Self {
+    pub(crate) fn new(reservation_repository: ReservationRepository) -> Self {
         Self {
             reservation_repository,
         }
     }
 
-    pub fn checkin(&self, reservation_id: String) -> Result<String> {
+    pub(crate) fn checkin(&self, reservation_id: String) -> Result<String> {
         // get reservation from id
         let reservation = self
             .reservation_repository
             .get_reservation(&reservation_id)?;
 
         // set reservation signin status
-        self.reservation_repository.signin(reservation.reservation_id)?;
+        self.reservation_repository
+            .signin(reservation.reservation_id)?;
 
         // return room number
         Ok(reservation.room.to_string())

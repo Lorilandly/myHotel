@@ -1,20 +1,25 @@
 use crate::*;
 
 #[derive(Clone, Debug)]
-pub struct RoomRepository {
+pub(crate) struct RoomRepository {
     db: Rc<Connection>,
 }
 
+impl repository::Repository for RoomRepository {}
+
 impl RoomRepository {
-    pub fn new(db: Rc<Connection>) -> Self {
+    pub(crate) fn new(db: Rc<Connection>) -> Self {
         Self { db }
     }
 
-    pub fn get_empty_rooms(&self, date: NaiveDate) -> Result<Vec<String>> {
-        let mut stmt = self
-            .db
-            // .prepare(&format!("SELECT room FROM reservation where date=date('{}')", date))?;
-            .prepare("SELECT * FROM reservation ")?;
+    pub(crate) fn get_empty_rooms(&self, date: NaiveDate) -> Result<Vec<String>> {
+        let mut stmt = self.db.prepare(&format!(
+            "SELECT room_number FROM room
+                WHERE room_number NOT IN (
+                    SELECT room FROM reservation WHERE date=date('{}')
+                )",
+            date.to_string(),
+        ))?;
         let rooms: Vec<String> = stmt
             .query_map([], |row| row.get(0))?
             .map(|x| x.unwrap())

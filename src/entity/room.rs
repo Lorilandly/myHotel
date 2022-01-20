@@ -1,9 +1,8 @@
-use crate::*;
-
 #[derive(Clone, Debug)]
 pub struct Room {
     room_number: u32,
-    reservation: Uuid,
+    room_type: String,
+    room_price: u32,
 }
 
 impl Room {}
