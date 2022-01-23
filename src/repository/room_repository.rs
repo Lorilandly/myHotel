@@ -5,13 +5,14 @@ pub(crate) struct RoomRepository {
     db: Rc<Connection>,
 }
 
-impl repository::Repository for RoomRepository {}
-
-impl RoomRepository {
-    pub(crate) fn new(db: Rc<Connection>) -> Self {
+impl repository::Repository for RoomRepository {
+    fn new(db: Rc<Connection>) -> Self {
         Self { db }
     }
 
+}
+
+impl RoomRepository {
     pub(crate) fn get_empty_rooms(&self, date: NaiveDate) -> Result<Vec<String>> {
         let mut stmt = self.db.prepare(&format!(
             "SELECT room_number FROM room

@@ -16,7 +16,7 @@ impl ReservationController {
             room_repository,
         }
     }
-    pub(crate) fn reserve(&self, checkin_date: &str) -> Result<Uuid, Box<dyn error::Error>> {
+    pub(crate) fn reserve(&self, checkin_date: String) -> Result<Uuid, Box<dyn error::Error>> {
         // date needs to be in yyyy-mm-dd
         let checkin_date: NaiveDate = checkin_date.parse()?;
 
@@ -30,6 +30,12 @@ impl ReservationController {
         self.reservation_repository
             .insert_reservation(&reservation)?;
         Ok(reservation.reservation_id)
+    }
+    pub(crate) fn cancel(&self, reservation_id: String) -> Result<()> {
+        let reservation = self.reservation_repository.get_reservation(&reservation_id)?;
+        if reservation.checkin {return Ok(())}
+        self.reservation_repository.remove_reservation(reservation)?;
+        Ok(())
     }
 }
 

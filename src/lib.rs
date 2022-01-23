@@ -5,7 +5,7 @@ mod sql;
 
 use self::app::{checkin_controller::*, checkout_controller::*, reservation_controller::*};
 pub use self::entity::reservation::*;
-use self::repository::{reservation_repository::*, room_repository::*};
+use self::repository::{Repository, reservation_repository::*, room_repository::*};
 use self::sql::*;
 use chrono::naive::*;
 use rusqlite::{params, Connection, Result};
@@ -34,9 +34,18 @@ impl Hotel {
             checkout_controller,
         })
     }
-    pub fn reserve(&self, date: &str) -> Option<String> {
+    pub fn reserve(&self, date: String) -> Option<String> {
         match self.reservation_controller.reserve(date) {
             Ok(i) => Some(i.to_string()),
+            Err(e) => {
+                println!("{}", e);
+                None
+            }
+        }
+    }
+    pub fn cancel(&self, reservation_id: String) -> Option<String> {
+        match self.reservation_controller.cancel(reservation_id) {
+            Ok(_) => Some(String::from("success")),
             Err(e) => {
                 println!("{}", e);
                 None
@@ -70,6 +79,7 @@ mod tests {
     fn reservation() {
         let a = Hotel::new().expect("sth");
         // let b = a.reserve("1111-1-1");
+        let b = a.cancel("547".to_string());
         // let b = a.checkin("4a7".to_string());
         // let b = a.checkout(String::from("1"), "1bd8".to_string());
 

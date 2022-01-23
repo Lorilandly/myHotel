@@ -19,7 +19,7 @@ impl CheckinController {
 
         // set reservation signin status
         self.reservation_repository
-            .signin(reservation.reservation_id)?;
+            .checkin(reservation.reservation_id)?;
 
         // return room number
         Ok(reservation.room.to_string())

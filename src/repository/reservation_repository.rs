@@ -1,4 +1,3 @@
-use super::*;
 use crate::*;
 
 #[derive(Clone, Debug)]
@@ -6,13 +5,14 @@ pub(crate) struct ReservationRepository {
     db: Rc<Connection>,
 }
 
-impl Repository for ReservationRepository {}
-
-impl ReservationRepository {
-    pub(crate) fn new(db: Rc<Connection>) -> Self {
+impl Repository for ReservationRepository {
+    fn new(db: Rc<Connection>) -> Self {
         Self { db }
     }
 
+}
+
+impl ReservationRepository {
     pub(crate) fn get_reservation(&self, reservation_id: &str) -> Result<Reservation> {
         self.db.query_row(
             "SELECT reservation_id, date, room, checkin, checkout FROM reservation WHERE reservation_id LIKE ?1",
@@ -39,14 +39,23 @@ impl ReservationRepository {
         )?;
         Ok(())
     }
-    pub(crate) fn signin(&self, reservation_id: Uuid) -> Result<()> {
+    pub(crate) fn remove_reservation(&self, reservation: Reservation) -> Result<()> {
+        self.db.execute(
+            "DELETE FROM reservation WHERE reservation_id=?1",
+            params![
+                reservation.reservation_id.to_string()
+            ],
+        )?;
+        Ok(())
+    }
+    pub(crate) fn checkin(&self, reservation_id: Uuid) -> Result<()> {
         self.db.execute(
             "UPDATE reservation SET checkin=True WHERE reservation_id=?1",
             params![reservation_id.to_string()],
         )?;
         Ok(())
     }
-    pub(crate) fn signout(&self, reservation_id: Uuid) -> Result<()> {
+    pub(crate) fn checkout(&self, reservation_id: Uuid) -> Result<()> {
         self.db.execute(
             "UPDATE reservation SET checkout=True WHERE reservation_id=?1",
             params![reservation_id.to_string()],

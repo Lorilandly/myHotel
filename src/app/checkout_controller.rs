@@ -31,7 +31,7 @@ impl CheckoutController {
 
         // switch toggle state for checkout
         self.reservation_repository
-            .signout(reservation.reservation_id)?;
+            .checkout(reservation.reservation_id)?;
         Ok(())
     }
 }
