@@ -40,40 +40,28 @@ impl Hotel {
             checkout_controller,
         })
     }
-    pub fn reserve(&self, date: String) -> Option<String> {
+    pub fn reserve(&self, date: String) -> Result<String, String> {
         match self.reservation_controller.reserve(date) {
-            Ok(i) => Some(i.to_string()),
-            Err(e) => {
-                println!("{}", e);
-                None
-            }
+            Ok(i) => Ok(i.to_string()),
+            Err(e) => Err(format!("{}", e)),
         }
     }
-    pub fn cancel(&self, reservation_id: String) -> Option<String> {
+    pub fn cancel(&self, reservation_id: String) -> Result<String, String> {
         match self.reservation_controller.cancel(reservation_id) {
-            Ok(_) => Some(String::from("success")),
-            Err(e) => {
-                println!("{}", e);
-                None
-            }
+            Ok(_) => Ok(String::from("success")),
+            Err(e) => Err(format!("{}", e)),
         }
     }
-    pub fn checkin(&self, reservation_id: String) -> Option<String> {
+    pub fn checkin(&self, reservation_id: String) -> Result<String, String> {
         match self.checkin_controller.checkin(reservation_id) {
-            Ok(i) => Some(i.to_string()),
-            Err(e) => {
-                println!("{}", e);
-                None
-            }
+            Ok(i) => Ok(i.to_string()),
+            Err(e) => Err(format!("{}", e)),
         }
     }
-    pub fn checkout(&self, reservation_id: String, room: String) -> Option<String> {
+    pub fn checkout(&self, reservation_id: String, room: String) -> Result<String, String> {
         match self.checkout_controller.checkout(room, reservation_id) {
-            Ok(_) => Some(String::from("Success")),
-            Err(e) => {
-                println!("{}", e);
-                None
-            }
+            Ok(_) => Ok(String::from("Success")),
+            Err(e) => Err(format!("{}", e)),
         }
     }
 }

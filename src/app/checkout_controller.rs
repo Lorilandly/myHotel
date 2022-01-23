@@ -26,7 +26,7 @@ impl CheckoutController {
         if reservation.checkin == false {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,
-                "Customer not checked in yet!",
+                "Customer hasn't checked in yet!",
             )));
         }
 

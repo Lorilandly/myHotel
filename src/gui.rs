@@ -22,7 +22,7 @@ pub(crate) enum Operation {
 pub struct State {
     input: text_input::State,
     input_value: String,
-    result_value: Option<String>,
+    result_value: Result<String, String>,
     submit: button::State,
     reservation: button::State,
     cancel: button::State,
@@ -34,7 +34,7 @@ pub fn ini() -> State {
     State {
         input: text_input::State::new(),
         input_value: String::new(),
-        result_value: None,
+        result_value: Ok(String::new()),
         submit: button::State::new(),
         reservation: button::State::new(),
         cancel: button::State::new(),
@@ -73,26 +73,30 @@ impl Sandbox for HotelUI {
                 Message::Submit => {
                     let result = self.hotel.reserve(state.input_value.clone());
                     match result {
-                        Some(s) => state.result_value = Some(s),
-                        None => state.result_value = None,
+                        Ok(s) => state.result_value = Ok(s),
+                        Err(s) => state.result_value = Err(s),
                     };
                 }
                 Message::InputChanged(value) => {
                     state.input_value = value;
                 }
                 Message::ToReservation => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                 }
                 Message::ToCancel => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Cancel(state.clone());
                 }
                 Message::ToCheckin => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Checkin(state.clone());
                 }
                 Message::ToCheckout => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Checkout(state.clone());
                 }
             },
@@ -100,74 +104,95 @@ impl Sandbox for HotelUI {
                 Message::Submit => {
                     let result = self.hotel.cancel(state.input_value.clone());
                     match result {
-                        Some(s) => state.result_value = Some(s),
-                        None => state.result_value = None,
+                        Ok(s) => state.result_value = Ok(s),
+                        Err(s) => state.result_value = Err(s),
                     };
                 }
                 Message::InputChanged(value) => {
                     state.input_value = value;
                 }
                 Message::ToReservation => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Reserve(state.clone());
                 }
                 Message::ToCancel => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                 }
                 Message::ToCheckin => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Checkin(state.clone());
                 }
                 Message::ToCheckout => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Checkout(state.clone());
                 }
             },
             Operation::Checkin(state) => match event {
                 Message::Submit => {
-                    self.hotel.checkin(state.input_value.clone());
+                    let result = self.hotel.checkin(state.input_value.clone());
+                    match result {
+                        Ok(s) => state.result_value = Ok(s),
+                        Err(s) => state.result_value = Err(s),
+                    };
                 }
                 Message::InputChanged(value) => {
                     state.input_value = value;
                 }
                 Message::ToReservation => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Reserve(state.clone());
                 }
                 Message::ToCancel => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Cancel(state.clone());
                 }
                 Message::ToCheckin => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                 }
                 Message::ToCheckout => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Checkout(state.clone());
                 }
             },
             Operation::Checkout(state) => match event {
                 Message::Submit => {
-                    self.hotel
+                    let result = self
+                        .hotel
                         .checkout(state.input_value.clone(), String::from("0"));
+                    match result {
+                        Ok(s) => state.result_value = Ok(s),
+                        Err(s) => state.result_value = Err(s),
+                    };
                 }
                 Message::InputChanged(value) => {
                     state.input_value = value;
                 }
                 Message::ToReservation => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Reserve(state.clone());
                 }
                 Message::ToCancel => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Cancel(state.clone());
                 }
                 Message::ToCheckin => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                     self.operation = Operation::Checkin(state.clone());
                 }
                 Message::ToCheckout => {
-                    state.result_value = None;
+                    state.input_value = String::new();
+                    state.result_value = Ok(String::new());
                 }
             },
         }
@@ -202,10 +227,9 @@ impl Sandbox for HotelUI {
                 let button = button(submit, "submit").on_press(Message::Submit);
                 let input = TextInput::new(input, "yyyy-mm-dd", input_value, Message::InputChanged)
                     .on_submit(Message::Submit);
-                let result = if let Some(value) = result_value {
-                    Text::new(format!("Your reservation id is: {}", value.to_string(),))
-                } else {
-                    Text::new(String::new())
+                let result = match result_value {
+                    Ok(s) => Text::new(format!("Your reservation id is: {}", s.to_string(),)),
+                    Err(s) => Text::new(s.to_string()).color([1.0, 0.0, 0.0]),
                 };
 
                 elements
@@ -250,10 +274,9 @@ impl Sandbox for HotelUI {
                     Message::InputChanged,
                 )
                 .on_submit(Message::Submit);
-                let result = if let Some(value) = result_value {
-                    Text::new(format!("{}", value.to_string(),))
-                } else {
-                    Text::new(String::new())
+                let result = match result_value {
+                    Ok(s) => Text::new(format!("{}", s.to_string(),)),
+                    Err(s) => Text::new(s.to_string()).color([1.0, 0.0, 0.0]),
                 };
 
                 elements
@@ -298,10 +321,9 @@ impl Sandbox for HotelUI {
                     Message::InputChanged,
                 )
                 .on_submit(Message::Submit);
-                let result = if let Some(value) = result_value {
-                    Text::new(format!("{}", value.to_string(),))
-                } else {
-                    Text::new(String::new())
+                let result = match result_value {
+                    Ok(s) => Text::new(format!("{}", s.to_string(),)),
+                    Err(s) => Text::new(s.to_string()).color([1.0, 0.0, 0.0]),
                 };
 
                 elements
@@ -346,10 +368,9 @@ impl Sandbox for HotelUI {
                     Message::InputChanged,
                 )
                 .on_submit(Message::Submit);
-                let result = if let Some(value) = result_value {
-                    Text::new(format!("{}", value.to_string(),))
-                } else {
-                    Text::new(String::new())
+                let result = match result_value {
+                    Ok(s) => Text::new(format!("{}", s.to_string(),)),
+                    Err(s) => Text::new(s.to_string()).color([1.0, 0.0, 0.0]),
                 };
 
                 elements
