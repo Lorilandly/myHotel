@@ -16,7 +16,7 @@ use std::rc::Rc;
 use uuid::Uuid;
 
 pub fn main() -> iced::Result {
-    Hello::run(Settings::default())
+    HotelUI::run(Settings::default())
 }
 
 pub struct Hotel {
