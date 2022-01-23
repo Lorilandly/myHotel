@@ -1,17 +1,23 @@
 mod app;
 mod entity;
+mod gui;
 mod repository;
 mod sql;
 
-use self::app::{checkin_controller::*, checkout_controller::*, reservation_controller::*};
-pub use self::entity::reservation::*;
-use self::repository::{Repository, reservation_repository::*, room_repository::*};
+use self::app::*;
+use self::entity::*;
+use self::gui::*;
+use self::repository::*;
 use self::sql::*;
 use chrono::naive::*;
 use rusqlite::{params, Connection, Result};
 use std::error;
 use std::rc::Rc;
 use uuid::Uuid;
+
+pub fn main() -> iced::Result {
+    Hello::run(Settings::default())
+}
 
 pub struct Hotel {
     reservation_controller: ReservationController,

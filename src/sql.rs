@@ -1,9 +1,9 @@
 use crate::*;
 
-pub struct Sql;
+pub(super) struct Sql;
 
 impl Sql {
-    pub(crate) fn init(db_file: &str) -> Result<Connection> {
+    pub(super) fn init(db_file: &str) -> Result<Connection> {
         if std::path::Path::new(db_file).exists() {
             return Ok(Connection::open(db_file)?);
         }

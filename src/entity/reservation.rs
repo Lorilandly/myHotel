@@ -9,6 +9,8 @@ pub struct Reservation {
     pub checkout: bool,
 }
 
+impl Entity for Reservation {}
+
 impl Reservation {
     pub fn new(date: NaiveDate, room: u32) -> Self {
         Self {

@@ -9,3 +9,4 @@ edition = "2021"
 chrono = "0.4"
 rusqlite = { version = "0.26", features = ["chrono"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
+iced = "0.3.0"

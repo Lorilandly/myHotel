@@ -9,7 +9,6 @@ impl Repository for ReservationRepository {
     fn new(db: Rc<Connection>) -> Self {
         Self { db }
     }
-
 }
 
 impl ReservationRepository {
@@ -42,9 +41,7 @@ impl ReservationRepository {
     pub(crate) fn remove_reservation(&self, reservation: Reservation) -> Result<()> {
         self.db.execute(
             "DELETE FROM reservation WHERE reservation_id=?1",
-            params![
-                reservation.reservation_id.to_string()
-            ],
+            params![reservation.reservation_id.to_string()],
         )?;
         Ok(())
     }

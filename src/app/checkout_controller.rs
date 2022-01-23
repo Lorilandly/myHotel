@@ -11,6 +11,7 @@ impl CheckoutController {
         }
     }
 
+    #[allow(unused_variables)]
     pub(crate) fn checkout(
         &self,
         room: String,

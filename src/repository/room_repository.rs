@@ -9,7 +9,6 @@ impl repository::Repository for RoomRepository {
     fn new(db: Rc<Connection>) -> Self {
         Self { db }
     }
-
 }
 
 impl RoomRepository {

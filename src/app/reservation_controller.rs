@@ -32,9 +32,14 @@ impl ReservationController {
         Ok(reservation.reservation_id)
     }
     pub(crate) fn cancel(&self, reservation_id: String) -> Result<()> {
-        let reservation = self.reservation_repository.get_reservation(&reservation_id)?;
-        if reservation.checkin {return Ok(())}
-        self.reservation_repository.remove_reservation(reservation)?;
+        let reservation = self
+            .reservation_repository
+            .get_reservation(&reservation_id)?;
+        if reservation.checkin {
+            return Ok(());
+        }
+        self.reservation_repository
+            .remove_reservation(reservation)?;
         Ok(())
     }
 }
