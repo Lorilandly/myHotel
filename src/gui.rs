@@ -34,7 +34,7 @@ pub fn ini() -> State {
     State {
         input: text_input::State::new(),
         input_value: String::new(),
-        result_value: Ok(String::new()),
+        result_value: Err(String::new()),
         submit: button::State::new(),
         reservation: button::State::new(),
         cancel: button::State::new(),
@@ -82,7 +82,7 @@ impl Sandbox for HotelUI {
                 }
                 Message::ToReservation => {
                     state.input_value = String::new();
-                    state.result_value = Ok(String::new());
+                    state.result_value = Err(String::new());
                 }
                 Message::ToCancel => {
                     state.input_value = String::new();
@@ -113,7 +113,7 @@ impl Sandbox for HotelUI {
                 }
                 Message::ToReservation => {
                     state.input_value = String::new();
-                    state.result_value = Ok(String::new());
+                    state.result_value = Err(String::new());
                     self.operation = Operation::Reserve(state.clone());
                 }
                 Message::ToCancel => {
@@ -144,7 +144,7 @@ impl Sandbox for HotelUI {
                 }
                 Message::ToReservation => {
                     state.input_value = String::new();
-                    state.result_value = Ok(String::new());
+                    state.result_value = Err(String::new());
                     self.operation = Operation::Reserve(state.clone());
                 }
                 Message::ToCancel => {
@@ -177,7 +177,7 @@ impl Sandbox for HotelUI {
                 }
                 Message::ToReservation => {
                     state.input_value = String::new();
-                    state.result_value = Ok(String::new());
+                    state.result_value = Err(String::new());
                     self.operation = Operation::Reserve(state.clone());
                 }
                 Message::ToCancel => {
@@ -214,7 +214,7 @@ impl Sandbox for HotelUI {
 
                 let switch = Row::new()
                     .push(button(reservation, "Reservation").on_press(Message::ToReservation))
-                    .push(button(cancel, "Reservation").on_press(Message::ToCancel))
+                    .push(button(cancel, "Cancel").on_press(Message::ToCancel))
                     .push(button(checkin, "Checkin").on_press(Message::ToCheckin))
                     .push(button(checkout, "Checkout").on_press(Message::ToCheckout));
 
@@ -256,7 +256,7 @@ impl Sandbox for HotelUI {
 
                 let switch = Row::new()
                     .push(button(reservation, "Reservation").on_press(Message::ToReservation))
-                    .push(button(cancel, "Reservation").on_press(Message::ToCancel))
+                    .push(button(cancel, "Cancel").on_press(Message::ToCancel))
                     .push(button(checkin, "Checkin").on_press(Message::ToCheckin))
                     .push(button(checkout, "Checkout").on_press(Message::ToCheckout));
 
@@ -303,7 +303,7 @@ impl Sandbox for HotelUI {
 
                 let switch = Row::new()
                     .push(button(reservation, "Reservation").on_press(Message::ToReservation))
-                    .push(button(cancel, "Reservation").on_press(Message::ToCancel))
+                    .push(button(cancel, "Cancel").on_press(Message::ToCancel))
                     .push(button(checkin, "Checkin").on_press(Message::ToCheckin))
                     .push(button(checkout, "Checkout").on_press(Message::ToCheckout));
 
@@ -350,7 +350,7 @@ impl Sandbox for HotelUI {
 
                 let switch = Row::new()
                     .push(button(reservation, "Reservation").on_press(Message::ToReservation))
-                    .push(button(cancel, "Reservation").on_press(Message::ToCancel))
+                    .push(button(cancel, "Cancel").on_press(Message::ToCancel))
                     .push(button(checkin, "Checkin").on_press(Message::ToCheckin))
                     .push(button(checkout, "Checkout").on_press(Message::ToCheckout));
 
