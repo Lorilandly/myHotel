@@ -11,7 +11,7 @@ impl CheckinController {
         }
     }
 
-    pub(crate) fn checkin(&self, reservation_id: String) -> Result<String> {
+    pub(crate) fn checkin(&self, reservation_id: &str) -> Result<String> {
         // get reservation from id
         let reservation = self
             .reservation_repository

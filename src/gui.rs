@@ -1,56 +1,22 @@
-pub use iced::{
-    button,
-    text_input::{self, TextInput},
-    Button, Checkbox, Column, Command, Container, Element, Font, Length, Row, Sandbox, Settings,
-    Text,
+pub use iced::widget::Column;
+pub use iced::widget::{
+    button, checkbox, column, container, row, text, text_input, vertical_space,
 };
+pub use iced::{theme, Alignment, Color, Element, Length, Sandbox, Settings};
 
 pub(crate) struct HotelUI {
     hotel: crate::Hotel,
-    operation: Operation,
-}
-
-#[derive(Debug, Clone)]
-pub(crate) enum Operation {
-    Reserve(State),
-    Cancel(State),
-    Checkin(State),
-    Checkout(State),
-}
-
-#[derive(Debug, Clone)]
-pub struct State {
-    input: text_input::State,
-    input_value: String,
-    result_value: Result<String, String>,
-    submit: button::State,
-    reservation: button::State,
-    cancel: button::State,
-    checkin: button::State,
-    checkout: button::State,
-}
-
-pub fn ini() -> State {
-    State {
-        input: text_input::State::new(),
-        input_value: String::new(),
-        result_value: Err(String::new()),
-        submit: button::State::new(),
-        reservation: button::State::new(),
-        cancel: button::State::new(),
-        checkin: button::State::new(),
-        checkout: button::State::new(),
-    }
+    operation: ReserveOperations,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    InputChanged(String),
     ToReservation,
     ToCancel,
     ToCheckin,
     ToCheckout,
     Submit,
+    OperationMessage(OperationMessage),
 }
 
 impl Sandbox for HotelUI {
@@ -59,7 +25,7 @@ impl Sandbox for HotelUI {
     fn new() -> Self {
         Self {
             hotel: crate::Hotel::new().expect("Error during initialization!"),
-            operation: Operation::Reserve(ini()),
+            operation: ReserveOperations::new(),
         }
     }
 
@@ -67,6 +33,164 @@ impl Sandbox for HotelUI {
         String::from("Hotel Reservation UI")
     }
 
+    fn update(&mut self, event: Message) {
+        match event {
+            Message::ToReservation => {
+                self.operation.current_tab = Tab::Reserve {
+                    input: String::new(),
+                    output: String::new(),
+                };
+            }
+            Message::ToCancel => {
+                self.operation.current_tab = Tab::Cancel {
+                    input: String::new(),
+                    output: String::new(),
+                };
+            }
+            Message::ToCheckin => {
+                self.operation.current_tab = Tab::Checkin {
+                    input: String::new(),
+                    output: String::new(),
+                };
+            }
+            Message::ToCheckout => {
+                self.operation.current_tab = Tab::Checkout {
+                    input: String::new(),
+                    output: String::new(),
+                };
+            }
+            Message::Submit => {
+                self.operation.submit(&self.hotel);
+            }
+            Message::OperationMessage(msg) => {
+                self.operation.update(msg);
+            }
+        }
+    }
+
+    fn view(&self) -> Element<Message> {
+        let menu_bar = row![
+            button("Reservation")
+                .on_press(Message::ToReservation)
+                .style(if let Tab::Reserve { .. } = self.operation.current_tab {
+                    theme::Button::Primary
+                } else {
+                    theme::Button::Secondary
+                }),
+            button("Cancel").on_press(Message::ToCancel).style(
+                if let Tab::Cancel { .. } = self.operation.current_tab {
+                    theme::Button::Primary
+                } else {
+                    theme::Button::Secondary
+                }
+            ),
+            button("Checkin").on_press(Message::ToCheckin).style(
+                if let Tab::Checkin { .. } = self.operation.current_tab {
+                    theme::Button::Primary
+                } else {
+                    theme::Button::Secondary
+                }
+            ),
+            button("Checkout").on_press(Message::ToCheckout).style(
+                if let Tab::Checkout { .. } = self.operation.current_tab {
+                    theme::Button::Primary
+                } else {
+                    theme::Button::Secondary
+                }
+            ),
+        ];
+
+        let content: Element<_> = column![
+            menu_bar,
+            self.operation.view().map(Message::OperationMessage),
+            button("Submit").on_press(Message::Submit),
+        ]
+        .max_width(540)
+        .spacing(20)
+        .padding(20)
+        .into();
+
+        container(content).into()
+    }
+}
+
+enum Tab {
+    Reserve { input: String, output: String },
+    Cancel { input: String, output: String },
+    Checkin { input: String, output: String },
+    Checkout { input: String, output: String },
+}
+
+#[derive(Debug, Clone)]
+pub enum OperationMessage {
+    InputDateChanged(String),
+    InputUUIDChanged(String),
+}
+
+struct ReserveOperations {
+    current_tab: Tab,
+}
+
+impl<'a> ReserveOperations {
+    fn new() -> Self {
+        Self {
+            current_tab: Tab::Reserve {
+                input: String::new(),
+                output: String::new(),
+            },
+        }
+    }
+
+    fn submit(&mut self, hotel: &crate::Hotel) {
+        match &mut self.current_tab {
+            Tab::Reserve { input, output } => {
+                let result = hotel.reserve(input);
+                match result {
+                    Ok(s) => *output = s,
+                    Err(s) => *output = s,
+                };
+            }
+            Tab::Cancel { input, output } => {
+                let result = hotel.cancel(input);
+                match result {
+                    Ok(s) => *output = s,
+                    Err(s) => *output = s,
+                };
+            }
+            Tab::Checkin { input, output } => {
+                let result = hotel.checkin(input);
+                match result {
+                    Ok(s) => *output = s,
+                    Err(s) => *output = s,
+                };
+            }
+            Tab::Checkout { input, output } => {
+                let result = hotel.checkout(input, "0");
+                match result {
+                    Ok(s) => *output = s,
+                    Err(s) => *output = s,
+                };
+            }
+        }
+    }
+
+    fn update(&mut self, msg: OperationMessage) {
+        let tab = &mut self.current_tab;
+        match msg {
+            OperationMessage::InputDateChanged(new_value) => {
+                if let Tab::Reserve { input, .. } = tab {
+                    *input = new_value;
+                }
+            }
+            OperationMessage::InputUUIDChanged(new_value) => match tab {
+                Tab::Cancel { input, .. } => *input = new_value,
+                Tab::Checkin { input, .. } => *input = new_value,
+                Tab::Checkout { input, .. } => *input = new_value,
+                _ => (),
+            },
+        }
+    }
+    /*
     fn update(&mut self, event: Message) {
         match &mut self.operation {
             Operation::Reserve(state) => match event {
@@ -77,28 +201,6 @@ impl Sandbox for HotelUI {
                         Err(s) => state.result_value = Err(s),
                     };
                 }
-                Message::InputChanged(value) => {
-                    state.input_value = value;
-                }
-                Message::ToReservation => {
-                    state.input_value = String::new();
-                    state.result_value = Err(String::new());
-                }
-                Message::ToCancel => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Cancel(state.clone());
-                }
-                Message::ToCheckin => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Checkin(state.clone());
-                }
-                Message::ToCheckout => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Checkout(state.clone());
-                }
             },
             Operation::Cancel(state) => match event {
                 Message::Submit => {
@@ -108,28 +210,6 @@ impl Sandbox for HotelUI {
                         Err(s) => state.result_value = Err(s),
                     };
                 }
-                Message::InputChanged(value) => {
-                    state.input_value = value;
-                }
-                Message::ToReservation => {
-                    state.input_value = String::new();
-                    state.result_value = Err(String::new());
-                    self.operation = Operation::Reserve(state.clone());
-                }
-                Message::ToCancel => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                }
-                Message::ToCheckin => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Checkin(state.clone());
-                }
-                Message::ToCheckout => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Checkout(state.clone());
-                }
             },
             Operation::Checkin(state) => match event {
                 Message::Submit => {
@@ -138,28 +218,6 @@ impl Sandbox for HotelUI {
                         Ok(s) => state.result_value = Ok(s),
                         Err(s) => state.result_value = Err(s),
                     };
-                }
-                Message::InputChanged(value) => {
-                    state.input_value = value;
-                }
-                Message::ToReservation => {
-                    state.input_value = String::new();
-                    state.result_value = Err(String::new());
-                    self.operation = Operation::Reserve(state.clone());
-                }
-                Message::ToCancel => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Cancel(state.clone());
-                }
-                Message::ToCheckin => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                }
-                Message::ToCheckout => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Checkout(state.clone());
                 }
             },
             Operation::Checkout(state) => match event {
@@ -172,225 +230,62 @@ impl Sandbox for HotelUI {
                         Err(s) => state.result_value = Err(s),
                     };
                 }
-                Message::InputChanged(value) => {
-                    state.input_value = value;
-                }
-                Message::ToReservation => {
-                    state.input_value = String::new();
-                    state.result_value = Err(String::new());
-                    self.operation = Operation::Reserve(state.clone());
-                }
-                Message::ToCancel => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Cancel(state.clone());
-                }
-                Message::ToCheckin => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                    self.operation = Operation::Checkin(state.clone());
-                }
-                Message::ToCheckout => {
-                    state.input_value = String::new();
-                    state.result_value = Ok(String::new());
-                }
             },
         }
     }
+    */
 
-    fn view(&mut self) -> Element<Message> {
-        match &mut self.operation {
-            Operation::Reserve(State {
-                input,
-                input_value,
-                result_value,
-                submit,
-                reservation,
-                cancel,
-                checkin,
-                checkout,
-            }) => {
-                let elements = Column::new();
-
-                let switch = Row::new()
-                    .push(button(reservation, "Reservation").on_press(Message::ToReservation))
-                    .push(button(cancel, "Cancel").on_press(Message::ToCancel))
-                    .push(button(checkin, "Checkin").on_press(Message::ToCheckin))
-                    .push(button(checkout, "Checkout").on_press(Message::ToCheckout));
-
-                let title = Text::new("Reserve a room")
-                    .width(Length::Fill)
-                    .size(100)
-                    .color([0.5, 0.5, 0.5])
-                    .horizontal_alignment(iced::HorizontalAlignment::Center);
-
-                let button = button(submit, "submit").on_press(Message::Submit);
-                let input = TextInput::new(input, "yyyy-mm-dd", input_value, Message::InputChanged)
-                    .on_submit(Message::Submit);
-                let result = match result_value {
-                    Ok(s) => Text::new(format!("Your reservation id is: {}", s.to_string(),)),
-                    Err(s) => Text::new(s.to_string()).color([1.0, 0.0, 0.0]),
-                };
-
-                elements
-                    .max_width(800)
-                    .spacing(20)
-                    .push(switch)
-                    .push(title)
-                    .push(input)
-                    .push(result)
-                    .push(button)
-                    .into()
-            }
-            Operation::Cancel(State {
-                input,
-                input_value,
-                result_value,
-                submit,
-                reservation,
-                cancel,
-                checkin,
-                checkout,
-            }) => {
-                let elements = Column::new();
-
-                let switch = Row::new()
-                    .push(button(reservation, "Reservation").on_press(Message::ToReservation))
-                    .push(button(cancel, "Cancel").on_press(Message::ToCancel))
-                    .push(button(checkin, "Checkin").on_press(Message::ToCheckin))
-                    .push(button(checkout, "Checkout").on_press(Message::ToCheckout));
-
-                let title = Text::new("Cancel a reservation")
-                    .width(Length::Fill)
-                    .size(100)
-                    .color([0.5, 0.5, 0.5])
-                    .horizontal_alignment(iced::HorizontalAlignment::Center);
-
-                let button = button(submit, "submit").on_press(Message::Submit);
-                let input = TextInput::new(
-                    input,
-                    "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-                    input_value,
-                    Message::InputChanged,
-                )
-                .on_submit(Message::Submit);
-                let result = match result_value {
-                    Ok(s) => Text::new(format!("{}", s.to_string(),)),
-                    Err(s) => Text::new(s.to_string()).color([1.0, 0.0, 0.0]),
-                };
-
-                elements
-                    .max_width(800)
-                    .spacing(20)
-                    .push(switch)
-                    .push(title)
-                    .push(input)
-                    .push(result)
-                    .push(button)
-                    .into()
-            }
-            Operation::Checkin(State {
-                input,
-                input_value,
-                result_value,
-                submit,
-                reservation,
-                cancel,
-                checkin,
-                checkout,
-            }) => {
-                let elements = Column::new();
-
-                let switch = Row::new()
-                    .push(button(reservation, "Reservation").on_press(Message::ToReservation))
-                    .push(button(cancel, "Cancel").on_press(Message::ToCancel))
-                    .push(button(checkin, "Checkin").on_press(Message::ToCheckin))
-                    .push(button(checkout, "Checkout").on_press(Message::ToCheckout));
-
-                let title = Text::new("Checkin to a room")
-                    .width(Length::Fill)
-                    .size(100)
-                    .color([0.5, 0.5, 0.5])
-                    .horizontal_alignment(iced::HorizontalAlignment::Center);
-
-                let button = button(submit, "submit").on_press(Message::Submit);
-                let input = TextInput::new(
-                    input,
-                    "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-                    input_value,
-                    Message::InputChanged,
-                )
-                .on_submit(Message::Submit);
-                let result = match result_value {
-                    Ok(s) => Text::new(format!("{}", s.to_string(),)),
-                    Err(s) => Text::new(s.to_string()).color([1.0, 0.0, 0.0]),
-                };
-
-                elements
-                    .max_width(800)
-                    .spacing(20)
-                    .push(switch)
-                    .push(title)
-                    .push(input)
-                    .push(result)
-                    .push(button)
-                    .into()
-            }
-            Operation::Checkout(State {
-                input,
-                input_value,
-                result_value,
-                submit,
-                reservation,
-                cancel,
-                checkin,
-                checkout,
-            }) => {
-                let elements = Column::new();
-
-                let switch = Row::new()
-                    .push(button(reservation, "Reservation").on_press(Message::ToReservation))
-                    .push(button(cancel, "Cancel").on_press(Message::ToCancel))
-                    .push(button(checkin, "Checkin").on_press(Message::ToCheckin))
-                    .push(button(checkout, "Checkout").on_press(Message::ToCheckout));
-
-                let title = Text::new("Checkout from Hotel")
-                    .width(Length::Fill)
-                    .size(100)
-                    .color([0.5, 0.5, 0.5])
-                    .horizontal_alignment(iced::HorizontalAlignment::Center);
-
-                let button = button(submit, "submit").on_press(Message::Submit);
-                let input = TextInput::new(
-                    input,
-                    "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-                    input_value,
-                    Message::InputChanged,
-                )
-                .on_submit(Message::Submit);
-                let result = match result_value {
-                    Ok(s) => Text::new(format!("{}", s.to_string(),)),
-                    Err(s) => Text::new(s.to_string()).color([1.0, 0.0, 0.0]),
-                };
-
-                elements
-                    .max_width(800)
-                    .spacing(20)
-                    .push(switch)
-                    .push(title)
-                    .push(input)
-                    .push(result)
-                    .push(button)
-                    .into()
-            }
+    fn view(&self) -> Element<OperationMessage> {
+        match &self.current_tab {
+            Tab::Reserve { input, output } => Self::reserve(input, output),
+            Tab::Cancel { input, output } => Self::cancel(input, output),
+            Tab::Checkin { input, output } => Self::checkin(input, output),
+            Tab::Checkout { input, output } => Self::checkout(input, output),
         }
+        .into()
     }
-}
-fn button<'a, Message: Clone>(state: &'a mut button::State, label: &str) -> Button<'a, Message> {
-    Button::new(
-        state,
-        Text::new(label).horizontal_alignment(iced::HorizontalAlignment::Center),
-    )
-    .padding(12)
-    .min_width(100)
+
+    fn reserve(input: &str, output: &str) -> Column<'a, OperationMessage> {
+        column![
+            text_input("yyyy-mm-dd", input, OperationMessage::InputDateChanged),
+            text(output),
+        ]
+        .into()
+    }
+
+    fn cancel(input: &str, output: &str) -> Column<'a, OperationMessage> {
+        column![
+            text_input(
+                "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
+                input,
+                OperationMessage::InputUUIDChanged
+            ),
+            text(output),
+        ]
+        .into()
+    }
+
+    fn checkin(input: &str, output: &str) -> Column<'a, OperationMessage> {
+        column![
+            text_input(
+                "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
+                input,
+                OperationMessage::InputUUIDChanged
+            ),
+            text(output),
+        ]
+        .into()
+    }
+
+    fn checkout(input: &str, output: &str) -> Column<'a, OperationMessage> {
+        column![
+            text_input(
+                "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
+                input,
+                OperationMessage::InputUUIDChanged
+            ),
+            text(output),
+        ]
+        .into()
+    }
 }

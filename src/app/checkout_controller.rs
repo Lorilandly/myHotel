@@ -14,8 +14,8 @@ impl CheckoutController {
     #[allow(unused_variables)]
     pub(crate) fn checkout(
         &self,
-        room: String,
-        reservation_id: String,
+        room: &str,
+        reservation_id: &str,
     ) -> Result<(), Box<dyn error::Error>> {
         // get reservation from id
         let reservation = self

@@ -1,7 +1,7 @@
 [package]
 name = "my_hotel"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -9,4 +9,4 @@ edition = "2018"
 chrono = "0.4"
 rusqlite = { version = "0.26", features = ["chrono"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
-iced = "0.3.0"
+iced = "0.6.0"
