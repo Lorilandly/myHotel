@@ -36,28 +36,16 @@ impl Sandbox for HotelUI {
     fn update(&mut self, event: Message) {
         match event {
             Message::ToReservation => {
-                self.operation.current_tab = Tab::Reserve {
-                    input: String::new(),
-                    output: String::new(),
-                };
+                self.operation.current_tab = Tab::Reserve(Default::default());
             }
             Message::ToCancel => {
-                self.operation.current_tab = Tab::Cancel {
-                    input: String::new(),
-                    output: String::new(),
-                };
+                self.operation.current_tab = Tab::Cancel(Default::default());
             }
             Message::ToCheckin => {
-                self.operation.current_tab = Tab::Checkin {
-                    input: String::new(),
-                    output: String::new(),
-                };
+                self.operation.current_tab = Tab::Checkin(Default::default());
             }
             Message::ToCheckout => {
-                self.operation.current_tab = Tab::Checkout {
-                    input: String::new(),
-                    output: String::new(),
-                };
+                self.operation.current_tab = Tab::Checkout(Default::default());
             }
             Message::Submit => {
                 self.operation.submit(&self.hotel);
@@ -72,27 +60,27 @@ impl Sandbox for HotelUI {
         let menu_bar = row![
             button("Reservation")
                 .on_press(Message::ToReservation)
-                .style(if let Tab::Reserve { .. } = self.operation.current_tab {
+                .style(if let Tab::Reserve(_) = self.operation.current_tab {
                     theme::Button::Primary
                 } else {
                     theme::Button::Secondary
                 }),
             button("Cancel").on_press(Message::ToCancel).style(
-                if let Tab::Cancel { .. } = self.operation.current_tab {
+                if let Tab::Cancel(_) = self.operation.current_tab {
                     theme::Button::Primary
                 } else {
                     theme::Button::Secondary
                 }
             ),
             button("Checkin").on_press(Message::ToCheckin).style(
-                if let Tab::Checkin { .. } = self.operation.current_tab {
+                if let Tab::Checkin(_) = self.operation.current_tab {
                     theme::Button::Primary
                 } else {
                     theme::Button::Secondary
                 }
             ),
             button("Checkout").on_press(Message::ToCheckout).style(
-                if let Tab::Checkout { .. } = self.operation.current_tab {
+                if let Tab::Checkout(_) = self.operation.current_tab {
                     theme::Button::Primary
                 } else {
                     theme::Button::Secondary
@@ -110,15 +98,21 @@ impl Sandbox for HotelUI {
         .padding(20)
         .into();
 
-        container(content).into()
+        container(content.explain(Color::BLACK)).into()
     }
 }
 
+#[derive(Default)]
+struct IO {
+    input: String,
+    output: String,
+}
+
 enum Tab {
-    Reserve { input: String, output: String },
-    Cancel { input: String, output: String },
-    Checkin { input: String, output: String },
-    Checkout { input: String, output: String },
+    Reserve(IO),
+    Cancel(IO),
+    Checkin(IO),
+    Checkout(IO),
 }
 
 #[derive(Debug, Clone)]
@@ -134,37 +128,34 @@ struct ReserveOperations {
 impl<'a> ReserveOperations {
     fn new() -> Self {
         Self {
-            current_tab: Tab::Reserve {
-                input: String::new(),
-                output: String::new(),
-            },
+            current_tab: Tab::Reserve(Default::default()),
         }
     }
 
     fn submit(&mut self, hotel: &crate::Hotel) {
         match &mut self.current_tab {
-            Tab::Reserve { input, output } => {
+            Tab::Reserve(IO { input, output }) => {
                 let result = hotel.reserve(input);
                 match result {
                     Ok(s) => *output = s,
                     Err(s) => *output = s,
                 };
             }
-            Tab::Cancel { input, output } => {
+            Tab::Cancel(IO { input, output }) => {
                 let result = hotel.cancel(input);
                 match result {
                     Ok(s) => *output = s,
                     Err(s) => *output = s,
                 };
             }
-            Tab::Checkin { input, output } => {
+            Tab::Checkin(IO { input, output }) => {
                 let result = hotel.checkin(input);
                 match result {
                     Ok(s) => *output = s,
                     Err(s) => *output = s,
                 };
             }
-            Tab::Checkout { input, output } => {
+            Tab::Checkout(IO { input, output }) => {
                 let result = hotel.checkout(input, "0");
                 match result {
                     Ok(s) => *output = s,
@@ -178,14 +169,14 @@ impl<'a> ReserveOperations {
         let tab = &mut self.current_tab;
         match msg {
             OperationMessage::InputDateChanged(new_value) => {
-                if let Tab::Reserve { input, .. } = tab {
+                if let Tab::Reserve(IO { input, .. }) = tab {
                     *input = new_value;
                 }
             }
             OperationMessage::InputUUIDChanged(new_value) => match tab {
-                Tab::Cancel { input, .. } => *input = new_value,
-                Tab::Checkin { input, .. } => *input = new_value,
-                Tab::Checkout { input, .. } => *input = new_value,
+                Tab::Cancel(IO { input, .. }) => *input = new_value,
+                Tab::Checkin(IO { input, .. }) => *input = new_value,
+                Tab::Checkout(IO { input, .. }) => *input = new_value,
                 _ => (),
             },
         }
@@ -237,10 +228,10 @@ impl<'a> ReserveOperations {
 
     fn view(&self) -> Element<OperationMessage> {
         match &self.current_tab {
-            Tab::Reserve { input, output } => Self::reserve(input, output),
-            Tab::Cancel { input, output } => Self::cancel(input, output),
-            Tab::Checkin { input, output } => Self::checkin(input, output),
-            Tab::Checkout { input, output } => Self::checkout(input, output),
+            Tab::Reserve(IO { input, output }) => Self::reserve(input, output),
+            Tab::Cancel(IO { input, output }) => Self::cancel(input, output),
+            Tab::Checkin(IO { input, output }) => Self::checkin(input, output),
+            Tab::Checkout(IO { input, output }) => Self::checkout(input, output),
         }
         .into()
     }

@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4"
-rusqlite = { version = "0.26", features = ["chrono"] }
-uuid = { version = "0.8", features = ["serde", "v4"] }
+rusqlite = { version = "0.28", features = ["chrono"] }
+uuid = { version = "1.2.2", features = ["v4"] }
 iced = "0.6.0"
