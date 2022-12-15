@@ -229,9 +229,9 @@ impl<'a> ReserveOperations {
     fn view(&self) -> Element<OperationMessage> {
         match &self.current_tab {
             Tab::Reserve(IO { input, output }) => Self::reserve(input, output),
-            Tab::Cancel(IO { input, output }) => Self::cancel(input, output),
-            Tab::Checkin(IO { input, output }) => Self::checkin(input, output),
-            Tab::Checkout(IO { input, output }) => Self::checkout(input, output),
+            Tab::Cancel(IO { input, output })
+            | Tab::Checkin(IO { input, output })
+            | Tab::Checkout(IO { input, output }) => Self::cancel_checkin_checkout(input, output),
         }
         .into()
     }
@@ -244,31 +244,7 @@ impl<'a> ReserveOperations {
         .into()
     }
 
-    fn cancel(input: &str, output: &str) -> Column<'a, OperationMessage> {
-        column![
-            text_input(
-                "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-                input,
-                OperationMessage::InputUUIDChanged
-            ),
-            text(output),
-        ]
-        .into()
-    }
-
-    fn checkin(input: &str, output: &str) -> Column<'a, OperationMessage> {
-        column![
-            text_input(
-                "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-                input,
-                OperationMessage::InputUUIDChanged
-            ),
-            text(output),
-        ]
-        .into()
-    }
-
-    fn checkout(input: &str, output: &str) -> Column<'a, OperationMessage> {
+    fn cancel_checkin_checkout(input: &str, output: &str) -> Column<'a, OperationMessage> {
         column![
             text_input(
                 "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
