@@ -98,7 +98,7 @@ impl Sandbox for HotelUI {
         .padding(20)
         .into();
 
-        container(content.explain(Color::BLACK)).into()
+        container(content).into()
     }
 }
 
